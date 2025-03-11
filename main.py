@@ -84,7 +84,6 @@ else:
     print("Nepodarilo sa nájsť dostatok bodov pre kalibráciu.")
 
 
-
 save_directory = "chess_images"
 os.makedirs(save_directory, exist_ok=True)
 
@@ -111,18 +110,24 @@ cam.start_acquisition()
 captured_images = 0
 images = []
 
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(0)
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    cam.get_image(img)  # Získa obraz z kamery
+    frame = img.get_image_data_numpy()  # Konvertuje obraz na numpy array
+
+    frame = cv2.resize(frame, (480, 480))
+
     undistorted_frame = cv2.undistort(frame, newcameramtx, dist)
     cv2.imshow('Undistorted Frame', undistorted_frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
 
-    cap.release()
-    cv2.destroyAllWindows()
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break  # Ukončí slučku, ale kamera sa stále drží otvorená
+
+
+# Uvoľnenie kamery a zatvorenie okien až po ukončení snímania
+# cam.release()
+cv2.destroyAllWindows()
+
 
     # cam.get_image(img)
     # image = img.get_image_data_numpy()
