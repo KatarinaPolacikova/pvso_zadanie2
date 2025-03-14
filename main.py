@@ -61,8 +61,6 @@ if objpoints and imgpoints:
     calibration_data = {
         "camera_matrix": mtx,
         "distortion_coefficients": dist,
-        "rotation_vectors": rvecs,
-        "translation_vectors": tvecs
     }
     with open("camera_calibration.pkl", "wb") as f:
         pickle.dump(calibration_data, f)
@@ -83,77 +81,5 @@ if objpoints and imgpoints:
 else:
     print("Nepodarilo sa nájsť dostatok bodov pre kalibráciu.")
 
-
-save_directory = "chess_images"
-os.makedirs(save_directory, exist_ok=True)
-
-# Vytvorenie inštancie pre prvú pripojenú kameru
-cam = xiapi.Camera()
-
-# Spustenie komunikácie s kamerou
-print('Opening first camera...')
-cam.open_device()
-
-# Nastavenie parametrov kamery
-cam.set_exposure(100000)
-cam.set_param('imgdataformat', 'XI_RGB32')
-cam.set_param('auto_wb', 1)
-print('Exposure was set to %i us' % cam.get_exposure())
-
-# Vytvorenie inštancie pre obrázok
-img = xiapi.Image()
-
-# Spustenie získavania dát
-print('Starting data acquisition...')
-cam.start_acquisition()
-
-captured_images = 0
-images = []
-
-# cap = cv2.VideoCapture(0)
-while True:
-    cam.get_image(img)  # Získa obraz z kamery
-    frame = img.get_image_data_numpy()  # Konvertuje obraz na numpy array
-
-    frame = cv2.resize(frame, (480, 480))
-
-    undistorted_frame = cv2.undistort(frame, newcameramtx, dist)
-    cv2.imshow('Undistorted Frame', undistorted_frame)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break  # Ukončí slučku, ale kamera sa stále drží otvorená
-
-
-# Uvoľnenie kamery a zatvorenie okien až po ukončení snímania
-# cam.release()
 cv2.destroyAllWindows()
 
-
-    # cam.get_image(img)
-    # image = img.get_image_data_numpy()
-    # image = cv2.resize(image, (480, 480))
-    # cv2.imshow("Live Feed", image)
-    #
-    # key = cv2.waitKey(1)
-    #
-    # if key == ord(' '):  # Stlačenie medzerníka zachytí snímku
-    #     image_path = os.path.join(save_directory, f"image_{captured_images + 1}.png")
-    #     cv2.imwrite(image_path, image)
-    #     print(f"Image {captured_images + 1} saved to {image_path}")
-    #     images.append(image)
-    #     captured_images += 1
-    #
-    #     if captured_images >= 20:
-    #         break  # Po zachytení 4 snímok sa program ukončí
-    # elif key == ord('q'):  # Stlačením 'q' sa program ukončí
-    #     break
-
-
-# Zastavenie získavania dát
-print('Stopping acquisition...')
-cam.stop_acquisition()
-
-# Ukončenie komunikácie s kamerou
-cam.close_device()
-cv2.destroyAllWindows()
-print('Done.')
